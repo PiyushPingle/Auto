@@ -1,28 +1,36 @@
-
 pipeline {
-    agent any
- 
+    agent any   // Runs on any available agent/node
+
     stages {
+        stage('Build') {
+            steps {
+                echo 'Building the project...'
+                sh 'mvn clean install'   // Example for Java/Maven projects
+            }
+        }
+
         stage('Test') {
             steps {
-                bat "mvn -D clean test"
+                echo 'Running tests...'
+                sh 'mvn test'
             }
- 
-            post {                
-                // If Maven was able to run the tests, even if some of the test
-                // failed, record the test results and archive the jar file.
-                success {
-                   publishHTML([
-                       allowMissing: false, 
-                       alwaysLinkToLastBuild: false, 
-                       keepAll: false, 
-                       reportDir: 'target/surefire-reports/', 
-                       reportFiles: 'emailable-report.html', 
-                       reportName: 'HTML Report', 
-                       reportTitles: '', 
-                       useWrapperFileDirectly: true])
-                }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                // Example: deploy to server or container
+                sh 'scp target/myapp.jar user@server:/apps/'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
